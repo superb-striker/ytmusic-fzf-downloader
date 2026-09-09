@@ -65,7 +65,7 @@ def get_all_albums(artist):
                 order_num = 5
             if order_num > 4 or order_num < 1:
                 print("Please enter a valid choice.\n ")
-        order_opts = ["Recency", "Popularity", "Alphabetical order", "None"]
+        order_opts = ["Recency", "Popularity", "Alphabetical order", None]
         all_albums = yt.get_artist_albums(
             albums_section["browseId"],
             albums_section["params"],
@@ -100,7 +100,7 @@ def get_all_singles(artist):
             order_num = int(input(prompt_for_order))
             if order_num > 4 or order_num < 1:
                 print("Please enter a valid choice.\n ")
-        order_opts = ["Recency", "Popularity", "Alphabetical order", "None"]
+        order_opts = ["Recency", "Popularity", "Alphabetical order", None]
         all_singles = yt.get_artist_albums(
             singles_section["browseId"],
             singles_section["params"],
