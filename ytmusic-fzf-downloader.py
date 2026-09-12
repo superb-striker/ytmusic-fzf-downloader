@@ -201,6 +201,33 @@ if not fzf.stdout.strip():
 
 item = items[int(fzf.stdout.split("\t")[0])]
 
+if item["type"] in ["album", "single"]:
+    album = yt.get_album(item["id"])
+    tracks = album["tracks"]
+    track_lines = [
+        f"{i}\t{track["title"]}"
+        for i, track in enumerate(tracks)
+    ]
+    track_fzf = subprocess.run(
+        [
+            "fzf",
+            "--multi",
+            "--delimiter", "\t",
+            "--with-nth=2..",
+            "--bind", "ctrl-a:select-all",
+            "--header", "TAB: select/unselect song | CTRL-A: select-all | ENTER: confirm",
+        ],
+        input="\n".join(track_lines),
+        capture_output=True,
+        text=True,
+    )
+    if not track_fzf.stdout.strip():
+        sys.exit(0)
+    selected_tracks = [
+        tracks[int(line.split("\t")[0])]
+        for line in track_fzf.stdout.strip().splitlines()
+    ]
+
 common_args = [
     "yt-dlp",
     "-x",
@@ -219,15 +246,16 @@ if item["type"] == "song":
         check=True
     )
 else:
-    playlist_title = yt.get_album(item["id"])["title"]
-    playlist_id = yt.get_album(item["id"])["audioPlaylistId"]
+    playlist_title = album["title"]
     album_dir = music_dir / playlist_title
     album_dir.mkdir(parents=True, exist_ok=True)
-    url = f"https://youtube.com/playlist?list={playlist_id}"
-    subprocess.run(
-        common_args + ["-o", "%(playlist_index)s - %(title)s.%(ext)s", url], 
-        cwd=album_dir,
-        check=True
-    )
-
-
+    for track in selected_tracks:
+        track_number = track.get("trackNumber")
+        output_template = f"{int(track_number):02d}.%(title)s.%(ext)s"
+        url = f"https://youtube.com/watch?v={track['videoId']}"
+        subprocess.run(
+            common_args + ["-o", output_template, url], 
+            cwd=album_dir,
+            check=True
+        )
+        
