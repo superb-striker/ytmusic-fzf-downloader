@@ -231,7 +231,7 @@ if item["type"] in ["album", "single"]:
 common_args = [
     "yt-dlp",
     "-x",
-    "--cookies-from-browser", "chrome:Profile 1",
+    "--cookies-from-browser", "chrome+gnomekeyring:Profile 1",
     "--audio-format", "best",
     "--no-keep-video",
     "--embed-thumbnail",
