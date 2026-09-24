@@ -3,6 +3,7 @@ import sys, subprocess
 from ytmusicapi import YTMusic
 from pathlib import Path 
 from textwrap import dedent 
+import re
 
 music_dir = Path("~/Music/").expanduser()
 
@@ -120,6 +121,9 @@ def get_all_singles(artist):
     return items
 
 
+def sanitize(name):
+    return re.sub(r'[<>:"/\\|?*]', '_', name)
+
 match category:
     case "album":
         albums = yt.search(query, filter="albums", limit=10)
@@ -194,6 +198,7 @@ fzf = subprocess.run(
     input="\n".join(lines), 
     capture_output=True, 
     text=True,
+    encoding="utf-8",
 )
 
 if not fzf.stdout.strip():
@@ -220,6 +225,7 @@ if item["type"] in ["album", "single"]:
         input="\n".join(track_lines),
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     if not track_fzf.stdout.strip():
         sys.exit(0)
@@ -231,7 +237,6 @@ if item["type"] in ["album", "single"]:
 common_args = [
     "yt-dlp",
     "-x",
-    "--cookies-from-browser", "chrome+gnomekeyring:Profile 1",
     "--audio-format", "best",
     "--no-keep-video",
     "--embed-thumbnail",
@@ -246,8 +251,10 @@ if item["type"] == "song":
         check=True
     )
 else:
-    playlist_title = album["title"]
-    album_dir = music_dir / playlist_title
+    artist_name = sanitize(album["artists"][0]["name"])
+    playlist_title = sanitize(album["title"])
+    album_dir = music_dir / artist_name / playlist_title
+    print(repr(album_dir))
     album_dir.mkdir(parents=True, exist_ok=True)
     for track in selected_tracks:
         track_number = track.get("trackNumber")
