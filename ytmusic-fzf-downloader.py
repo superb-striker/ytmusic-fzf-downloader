@@ -8,6 +8,10 @@ music_dir = Path("~/Music/").expanduser()
 
 yt = YTMusic()
 
+force = "--force" in sys.argv
+if "--force" in sys.argv:
+    sys.argv.remove("--force")
+
 if len(sys.argv) > 1 and sys.argv[1].lower() in ["album", "artist", "song"]:
     category = sys.argv[1].lower()
 elif len(sys.argv) > 1 and sys.argv[1].lower() not in ["album", "artist", "song"]:
@@ -119,6 +123,17 @@ def get_all_singles(artist):
         })
     return items
 
+
+def sanitize(name):
+    return re.sub(r'[<>:"/\\|?*]', '_', name)
+
+
+def is_already_downloaded(video_id):
+    for path in music_dir.rglob("*"):
+        if video_id in path.name:
+            return True
+    return False
+        
 
 match category:
     case "album":
@@ -238,24 +253,35 @@ common_args = [
     "--embed-metadata",
 ]
 
+
 if item["type"] == "song":
     url = f"https://youtube.com/watch?v={item['id']}"
-    subprocess.run(
-        common_args + ["-o", "%(title)s.%(ext)s", url],
-        cwd=music_dir,
-        check=True
-    )
+    if is_already_downloaded(item['id']) and not force:
+        print(f"{item['title']} already downloaded")
+    else:
+        subprocess.run(
+            common_args + ["-o", f"%(title)s [{item['id']}].%(ext)s", url],
+            cwd=music_dir,
+            check=True
+        )
 else:
     playlist_title = album["title"]
     album_dir = music_dir / playlist_title
     album_dir.mkdir(parents=True, exist_ok=True)
     for track in selected_tracks:
         track_number = track.get("trackNumber")
-        output_template = f"{int(track_number):02d}.%(title)s.%(ext)s"
+        output_template = f"{int(track_number):02d}.%(title)s [{track['videoId']}].%(ext)s"
         url = f"https://youtube.com/watch?v={track['videoId']}"
-        subprocess.run(
-            common_args + ["-o", output_template, url], 
-            cwd=album_dir,
-            check=True
-        )
+        if is_already_downloaded(track['videoId']) and not force:
+            print(f"{track['title']} Already downloaded")
+        else:
+            subprocess.run(
+                common_args + ["-o", output_template, url], 
+                cwd=album_dir,
+                check=True
+            )
         
+
+
+
+
