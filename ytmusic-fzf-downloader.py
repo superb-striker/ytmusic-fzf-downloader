@@ -23,13 +23,13 @@ elif len(sys.argv) > 1 and sys.argv[1].lower() not in ["album", "artist", "song"
     print("category can be : album, artist, song")
     sys.exit(1)
 else:
-    category = input("Category: ").lower()
+    category = input("Category (Album/Artist/Song): ").lower()
 
 if category not in ["album", "artist", "song"]:
     print("Please enter a valid category [album, artist, song]")
     sys.exit(1)
 
-query = " ".join(sys.argv[2:]) or input("Artist/Album/Song: ")
+query = " ".join(sys.argv[2:]) or input(f"{category.capitalize()} name: ")
 
 items = []
 
@@ -126,17 +126,14 @@ def get_all_singles(artist):
         })
     return items
 
-
 def sanitize(name):
     return re.sub(r'[<>:"/\\|?*]', '_', name)
-
 
 def is_already_downloaded(video_id):
     for path in music_dir.rglob("*"):
         if video_id in path.name:
             return True
     return False
-        
 
 match category:
     case "album":
@@ -212,14 +209,35 @@ fzf = subprocess.run(
     input="\n".join(lines), 
     capture_output=True, 
     text=True,
+    check=False
 )
 
-if not fzf.stdout.strip():
+if fzf.returncode != 0 or not fzf.stdout.strip():
     sys.exit(0)
 
 item = items[int(fzf.stdout.split("\t")[0])]
 
-if item["type"] in ["album", "single"]:
+common_args = [
+    "yt-dlp",
+    "-x",
+    "--cookies-from-browser", "chrome+gnomekeyring:Profile 1",
+    "--audio-format", "best",
+    "--no-keep-video",
+    "--embed-thumbnail",
+    "--embed-metadata",
+]
+
+if item["type"] == "song":
+    url = f"https://youtube.com/watch?v={item['id']}"
+    if is_already_downloaded(item['id']) and not force:
+        print(f"{item['title']} already downloaded")
+    else:
+        subprocess.run(
+            common_args + ["-o", f"%(title)s [{item['id']}].%(ext)s", url],
+            cwd=music_dir,
+            check=True
+        )
+else:
     album = yt.get_album(item["id"])
     tracks = album["tracks"]
     track_lines = [
@@ -238,37 +256,15 @@ if item["type"] in ["album", "single"]:
         input="\n".join(track_lines),
         capture_output=True,
         text=True,
+        check=False
     )
-    if not track_fzf.stdout.strip():
+    if track_fzf.returncode != 0 or not track_fzf.stdout.strip():
         sys.exit(0)
     selected_tracks = [
         tracks[int(line.split("\t")[0])]
         for line in track_fzf.stdout.strip().splitlines()
     ]
-
-common_args = [
-    "yt-dlp",
-    "-x",
-    "--cookies-from-browser", "chrome+gnomekeyring:Profile 1",
-    "--audio-format", "best",
-    "--no-keep-video",
-    "--embed-thumbnail",
-    "--embed-metadata",
-]
-
-
-if item["type"] == "song":
-    url = f"https://youtube.com/watch?v={item['id']}"
-    if is_already_downloaded(item['id']) and not force:
-        print(f"{item['title']} already downloaded")
-    else:
-        subprocess.run(
-            common_args + ["-o", f"%(title)s [{item['id']}].%(ext)s", url],
-            cwd=music_dir,
-            check=True
-        )
-else:
-    playlist_title = album["title"]
+    playlist_title = album["title"] 
     album_dir = music_dir / playlist_title
     album_dir.mkdir(parents=True, exist_ok=True)
     for track in selected_tracks:
