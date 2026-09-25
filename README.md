@@ -61,13 +61,13 @@ deno --version
 ```bash
 git clone https://github.com/superb-striker/ytmusic-fzf-downloader.git
 cd ytmusic-fzf-downloader
-chmod +x ytmusic-fzf-downloader.py
+chmod +x ytmpnd.py
 ```
 
 Optionally put it on your `PATH`:
 
 ```bash
-ln -s "$(pwd)/ytmusic-fzf-downloader.py" /usr/local/bin/ytmpnd
+ln -s "$(pwd)/ytmpnd.py" /usr/local/bin/ytmpnd
 ```
 
 ## Usage
