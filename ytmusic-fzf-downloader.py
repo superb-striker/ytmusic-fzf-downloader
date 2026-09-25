@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-import sys, subprocess
+import re
+import subprocess
+import sys
+from pathlib import Path
+from textwrap import dedent
+
 from ytmusicapi import YTMusic
-from pathlib import Path 
-from textwrap import dedent 
 
 music_dir = Path("~/Music/").expanduser()
 
@@ -280,8 +283,4 @@ else:
                 cwd=album_dir,
                 check=True
             )
-        
-
-
-
 
