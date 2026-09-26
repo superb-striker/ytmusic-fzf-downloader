@@ -6,8 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import browse
 import config
-import picker
-from download import download_selected_songs, download_song
+from handoff import decide_and_download
 
 force = "--force" in sys.argv
 if "--force" in sys.argv:
@@ -30,14 +29,5 @@ query = " ".join(sys.argv[2:]) or input(f"{category.capitalize()} name: ")
 
 items = browse.get_items(category, query)
 
-item = picker.single_select(items)
-
-if item["type"] == "song":
-    download_song(item, force)
-else:
-    tracks, playlist_title = browse.get_tracks_from_album(item["id"])
-    selected_tracks = picker.multi_select(tracks)
-    album_dir = config.music_dir / playlist_title
-    album_dir.mkdir(parents=True, exist_ok=True)
-    download_selected_songs(selected_tracks, album_dir, force)
+decide_and_download(category, items, force) 
 
