@@ -1,4 +1,3 @@
-import sys
 from textwrap import dedent
 
 from ytmusic_client import yt
@@ -108,9 +107,6 @@ def get_items(category, query):
     match category:
         case "album":
             albums = yt.search(query, filter="albums", limit=10)
-            if len(albums) == 0:
-                print(f"Did not find any albums for this query: {query}")
-                sys.exit(1)
             for album in albums:
                 items.append({
                     "type": "album", 
@@ -119,12 +115,7 @@ def get_items(category, query):
                     "id": album["browseId"]
                 })
         case "artist":
-            search_results = yt.search(query, filter="artists", limit=1)
-            if search_results:
-                artist_hit = search_results[0]
-            else:
-                print(f"Did not find artist by the name: {query}")
-                sys.exit(1)
+            artist_hit = yt.search(query, filter="artists", limit=1)[0]
             artist = yt.get_artist(artist_hit["browseId"])
             prompt_for_selection = dedent("""
                 What would you like to download?
@@ -165,9 +156,6 @@ def get_items(category, query):
                 items.extend(downloaders[option](artist))
         case "song":
             songs = yt.search(query, filter="songs", limit=10)
-            if len(songs) == 0:
-                print(f"Did not find any songs for this query: {query}")
-                sys.exit(1)
             for s in songs:
                 song = yt.get_song(s["videoId"])["videoDetails"]
                 items.append({

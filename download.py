@@ -34,11 +34,7 @@ def download_song(item, force):
             check=True
         )
 
-def download_selected_songs(selected_songs, force):
-    for song in selected_songs:
-        download_song(song, force)
-
-def download_selected_songs_in_album(selected_tracks, album_dir, force):
+def download_selected_songs(selected_tracks, album_dir, force):
     for track in selected_tracks:
         track_number = track.get("trackNumber")
         output_template = f"{int(track_number):02d}.%(title)s [{track['videoId']}].%(ext)s"
@@ -51,4 +47,5 @@ def download_selected_songs_in_album(selected_tracks, album_dir, force):
                 cwd=album_dir,
                 check=True
             )
+
 
