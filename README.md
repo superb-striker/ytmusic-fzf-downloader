@@ -27,6 +27,15 @@ albums, singles, songs, or any combination, with an optional sort order
 - Downloaded album/single tracks preserve their **original track numbers**
   (`01`, `02`, `05`, etc.), even when only a subset of tracks is selected
 
+## Project layout
+
+- `ytmpnd.py` — entry point: argument parsing and top-level flow only
+- `config.py` — `music_dir`, valid categories, shared constants
+- `ytmusic_client.py` — the shared `YTMusic()` instance
+- `browse.py` — all search/API logic: resolving a query into items, fetching an artist's full albums/singles/songs
+- `picker.py` — the `fzf` wrappers (single-select and multi-select)
+- `download.py` — `sanitize()`, duplicate-detection, and the `yt-dlp` download calls
+
 ## Requirements
 
 - Python 3.10+ (uses `match`/`case`)
@@ -73,16 +82,16 @@ ln -s "$(pwd)/ytmpnd.py" /usr/local/bin/ytmpnd
 ## Usage
 
 ```bash
-ytmusic-fzf-downloader <category> <query>
+ytmpnd <category> <query>
 ```
 
 `<category>` is one of `album`, `artist`, or `song`. If you omit the
 arguments, the script will prompt you interactively.
 
 ```bash
-ytmusic-fzf-downloader artist Radiohead
-ytmusic-fzf-downloader album "In Rainbows"
-ytmusic-fzf-downloader song "Everything In Its Right Place"
+ytmpnd artist Radiohead
+ytmpnd album "In Rainbows"
+ytmpnd song "Everything In Its Right Place"
 ```
 
 ### Artist mode
