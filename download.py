@@ -38,7 +38,7 @@ def download_selected_songs(selected_songs, force):
     for song in selected_songs:
         download_song(song, force)
 
-def download_selected_songs_in_album(selected_tracks, album_dir, force):
+def download_selected_songs_in_album(selected_tracks, album_dir, force, link_features):
     for track in selected_tracks:
         track_number = track.get("trackNumber")
         output_template = f"{int(track_number):02d}.%(title)s [{track['videoId']}].%(ext)s"
@@ -51,4 +51,13 @@ def download_selected_songs_in_album(selected_tracks, album_dir, force):
                 cwd=album_dir,
                 check=True
             )
+            matches = list(album_dir.glob(f"*{track['videoId']}*"))
 
+            if link_features and len(track['artists']) > 1:
+                for i in track['artists'][1:]:
+                    artist_dir = config.music_dir / sanitize(i['name']) / "Features"
+                    artist_dir.mkdir(parents=True, exist_ok=True)
+                    feature_filename = re.sub(r'^\d+\.', '', matches[0].name)
+                    symlink_path = artist_dir / feature_filename
+                    if not symlink_path.exists():
+                        symlink_path.symlink_to(matches[0])

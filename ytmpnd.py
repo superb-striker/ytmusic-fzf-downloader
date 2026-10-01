@@ -9,8 +9,13 @@ import config
 from handoff import decide_and_download
 
 force = "--force" in sys.argv
+link_features = "--link-features" in sys.argv
+
 if "--force" in sys.argv:
     sys.argv.remove("--force")
+
+if "--link-features" in sys.argv:
+    sys.argv.remove("--link-features")
 
 if len(sys.argv) > 1 and sys.argv[1].lower() in config.categories:
     category = sys.argv[1].lower()
@@ -29,5 +34,5 @@ query = " ".join(sys.argv[2:]) or input(f"{category.capitalize()} name: ")
 
 items = browse.get_items(category, query)
 
-decide_and_download(category, items, force) 
+decide_and_download(category, items, force, link_features) 
 

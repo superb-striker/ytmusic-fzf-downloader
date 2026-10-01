@@ -126,6 +126,7 @@ def get_tracks_from_album(album_id):
     playlist_title = album["title"] 
     artwork = _thumbnail_url(album)
     album_artists = album.get("artists")
+    artist_name = album["artists"][0]["name"]
     for track in tracks:
         track_artists = track.get("artists") or album_artists
         metadata = {
@@ -139,7 +140,8 @@ def get_tracks_from_album(album_id):
         }
         track["metadata"] = metadata
         track["thumbnail"] = _thumbnail_url(track) or artwork
-    return tracks, playlist_title 
+    return tracks, playlist_title, artist_name 
+
 
 def get_items(category, query):
     items = []
