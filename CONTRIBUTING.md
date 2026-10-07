@@ -1,13 +1,10 @@
 # Contributing
 
-Thanks for considering a contribution. For larger changes, open an issue first
-to discuss the approach.
+Thanks for considering a contribution. For larger changes, open an issue first to discuss the approach.
 
 ## Set up locally
 
-The project requires Python 3.10+, `fzf`, and Deno. Thumbnail previews can use
-`chafa` (optional). Downloads currently use cookies from the default Chrome
-profile, which must be signed in to YouTube Music.
+The project requires Python 3.10+, `fzf`, and Deno. Thumbnail previews can use `chafa` (optional).
 
 ```bash
 git clone https://github.com/superb-striker/ytmusic-fzf-downloader.git
@@ -23,16 +20,13 @@ Run the program from the checkout with:
 python ytmpnd.py artist Radiohead
 ```
 
-The project does not yet have an automated test suite. Before submitting a
-change, run the affected flow manually when possible and describe what you
-checked in the pull request. Avoid downloading copyrighted material as part of
-validation; selection and preview flows can be checked before confirming a
-download.
+The project does not yet have an automated test suite.
+Before submitting a change, run the affected flow manually when possible and describe what you checked in the pull request. 
+Avoid downloading copyrighted material as part of validation; selection and preview flows can be checked before confirming a download.
 
 ## Good places to start
 
 - [#9: Store video IDs in audio metadata](https://github.com/superb-striker/ytmusic-fzf-downloader/issues/9) — the issue is labeled `good first issue`; this would enable cleaner filenames while keeping duplicate detection reliable.
-- [#5: Add persistent configuration](https://github.com/superb-striker/ytmusic-fzf-downloader/issues/5) — let users configure the music directory, browser, and download format/quality without editing source files.
 - [#10: Save lyrics as `.lrc` files](https://github.com/superb-striker/ytmusic-fzf-downloader/issues/10) — write synced or plain lyrics alongside downloaded tracks when available.
 - [#11: Follow artists and check for releases](https://github.com/superb-striker/ytmusic-fzf-downloader/issues/11) — persist followed artists and let users review new albums, singles, and songs.
 - [#4: Organize tracks by artist and link featured artists](https://github.com/superb-striker/ytmusic-fzf-downloader/issues/4) — organize canonical files under artist/album folders and optionally create feature symlinks. This is marked high priority.
