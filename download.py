@@ -16,12 +16,21 @@ def is_already_downloaded(video_id):
 common_args = [
     "yt-dlp",
     "-x",
-    "--cookies-from-browser", "chrome",
-    "--audio-format", "best",
-    "--no-keep-video",
-    "--embed-thumbnail",
-    "--embed-metadata",
+    "--audio-format", config.audio_format,
+    "--audio-quality", config.audio_quality,
 ]
+
+if config.cookies_from_browser:
+    common_args += ["--cookies-from-browser", config.cookies_from_browser]
+
+if config.keep_video:
+    common_args += ["--keep-video"]
+
+if config.embed_thumbnail:
+    common_args += ["--embed-thumbnail"]
+if config.embed_metadata:
+    common_args += ["--embed-metadata"]
+
 
 def download_song(item, force):
     if is_already_downloaded(item['id']) and not force:
