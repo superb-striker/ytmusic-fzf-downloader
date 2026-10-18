@@ -1,12 +1,11 @@
 import os
-from pathlib import Path
 import re
 import subprocess
 import tempfile
+from pathlib import Path
 
 import config
 from ytmusic_client import yt
-
 
 AUDIO_EXTENSIONS = {".aac", ".aiff", ".alac", ".flac", ".m4a", ".mka",
                     ".mp3", ".ogg", ".opus", ".vorbis", ".wav", ".webm"}

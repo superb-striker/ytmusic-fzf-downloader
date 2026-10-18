@@ -1,9 +1,9 @@
 import sys
 from textwrap import dedent
 
+from download import primary_artist
 from metadata import _album_text, _artists_text, _metadata, _thumbnail_url
 from ytmusic_client import yt
-from download import primary_artist
 
 
 def get_all_songs(artist):
