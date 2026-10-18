@@ -1,4 +1,4 @@
-#ytmusic-fzf-downloader
+# Download music from Youtube through the terminal
 
 A small command-line tool that searches YouTube Music for an artist, album, or song, lets you pick the result with [`fzf`](https://github.com/junegunn/fzf),
 and downloads it as audio with [`yt-dlp`](https://github.com/yt-dlp/yt-dlp).
