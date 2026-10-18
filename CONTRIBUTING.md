@@ -17,7 +17,7 @@ python -m pip install -r requirements.txt
 Run the program from the checkout with:
 
 ```bash
-python ytmpnd.py artist Radiohead
+python src/ytmpnd.py artist Radiohead
 ```
 
 The project does not yet have an automated test suite.

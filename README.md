@@ -28,15 +28,15 @@ For artists, it fetches their **entire** catalog (not just the ~25-item preview 
 
 ## Project layout
 
-- `ytmpnd.py` — entry point: argument parsing and top-level flow only
-- `config.py` — loads the INI config and holds sensible defaults for each configurable property
-- `ytmusic_client.py` — the shared `YTMusic()` instance
-- `browse.py` — all search/API logic: resolving a query into items, fetching an artist's full albums/singles/songs
-- `metadata.py` — metadata formatting and thumbnail selection helpers
-- `picker.py` — the `fzf` wrappers (single-select and multi-select)
-- `preview.py` — renders fzf preview metadata and cached thumbnail artwork
-- `handoff.py` — routes selected items to the appropriate track picker and downloader
-- `download.py` — `sanitize()`, duplicate-detection, and the `yt-dlp` download calls
+- `src/ytmpnd.py` — entry point: argument parsing and top-level flow only
+- `src/config.py` — loads the INI config and holds sensible defaults for each configurable property
+- `src/ytmusic_client.py` — the shared `YTMusic()` instance
+- `src/browse.py` — all search/API logic: resolving a query into items, fetching an artist's full albums/singles/songs
+- `src/metadata.py` — metadata formatting and thumbnail selection helpers
+- `src/picker.py` — the `fzf` wrappers (single-select and multi-select)
+- `src/preview.py` — renders fzf preview metadata and cached thumbnail artwork
+- `src/handoff.py` — routes selected items to the appropriate track picker and downloader
+- `src/download.py` — `sanitize()`, duplicate-detection, and the `yt-dlp` download calls
 
 ## Requirements
 
@@ -73,13 +73,13 @@ In Kitty, thumbnails use Kitty's image protocol; other terminals use Chafa's cha
 ```bash
 git clone https://github.com/superb-striker/ytmusic-fzf-downloader.git
 cd ytmusic-fzf-downloader
-chmod +x ytmpnd.py
+chmod +x src/ytmpnd.py
 ```
 
 Optionally put it on your `PATH`:
 
 ```bash
-ln -s "$(pwd)/ytmpnd.py" /usr/local/bin/ytmpnd
+ln -s "$(pwd)/src/ytmpnd.py" /usr/local/bin/ytmpnd
 ```
 
 ## Configuration
