@@ -3,6 +3,7 @@ from textwrap import dedent
 
 from metadata import _album_text, _artists_text, _metadata, _thumbnail_url
 from ytmusic_client import yt
+from download import primary_artist
 
 
 def get_all_songs(artist):
@@ -22,6 +23,8 @@ def get_all_songs(artist):
             "title": s["title"], 
             "sub": album,
             "id": s["videoId"],
+            "artists": s.get("artists") or [{"name": artist.get("name", "Unknown Artist")}],
+            "creditsBrowseId": s.get("creditsBrowseId"),
             "thumbnail": _thumbnail_url(s),
             "metadata": {
                 key: value for key, value in {
@@ -126,6 +129,7 @@ def get_tracks_from_album(album_id):
     playlist_title = album["title"] 
     artwork = _thumbnail_url(album)
     album_artists = album.get("artists")
+    artist_name = primary_artist(album_artists)
     for track in tracks:
         track_artists = track.get("artists") or album_artists
         metadata = {
@@ -137,9 +141,11 @@ def get_tracks_from_album(album_id):
                 "duration": track.get("duration") or track.get("length"),
             }.items() if value is not None and value != ""
         }
+        track["artists"] = track_artists or []
         track["metadata"] = metadata
         track["thumbnail"] = _thumbnail_url(track) or artwork
-    return tracks, playlist_title 
+    return tracks, playlist_title, artist_name 
+
 
 def get_items(category, query):
     items = []
@@ -215,13 +221,15 @@ def get_items(category, query):
             for s in songs:
                 song = yt.get_song(s["videoId"])["videoDetails"]
                 album_name = _album_text(song.get("album"))
-                artists = song.get("artists") or song.get("author") or s.get("artists")
+                artists = s.get("artists") or song.get("artists") or song.get("author")
                 items.append(
                     _metadata({
                         "type" : "song",
                         "title" : song["title"],
                         "sub" : song["author"],
-                        "id" : song["videoId"]
+                        "id" : song["videoId"],
+                        "artists": artists,
+                        "creditsBrowseId": s.get("creditsBrowseId") or song.get("creditsBrowseId")
                     }, 
                     artists=artists, 
                     album=album_name or _album_text(s.get("album")),

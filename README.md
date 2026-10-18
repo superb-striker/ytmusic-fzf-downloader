@@ -22,7 +22,8 @@ For artists, it fetches their **entire** catalog (not just the ~25-item preview 
   - `ENTER` to confirm the selection
 - Downloads only the tracks selected from an album/single
 - Downloads best-quality audio with embedded metadata + cover art via `yt-dlp`
-- Albums and singles are saved into their own folder under your `music_dir` (default `~/Music/`)
+- Albums are saved under `Artist/Album/`; standalone songs and artist-mode singles go under `Artist/Singles/`
+- Optional `--link-features` creates relative symlinks under collaborating performers without duplicating audio
 - Downloaded album/single tracks preserve their **original track numbers** (`01`, `02`, `05`, etc.), even when only a subset of tracks is selected
 
 ## Project layout
@@ -141,6 +142,50 @@ ytmpnd --force song "Everything In Its Right Place"
 
 This only bypasses the tool's check; `yt-dlp` may still skip a file that already exists at the output path.
 
+### Library organization and featured artists
+
+Albums use one canonical artist directory from the album metadata, so tracks from
+the same album stay together even when individual tracks have different performers.
+Standalone songs use the first credited artist; singles selected through artist
+mode use their release artist and share that artist's `Singles/` directory.
+Artist, album, and track names are sanitized for use as filesystem components.
+Missing artist metadata falls back to `Unknown Artist`.
+
+Add `--link-features` to create links for additional performers:
+
+```bash
+ytmpnd album "Album Name" --link-features
+ytmpnd song "Song Name" --link-features
+ytmpnd artist "Artist Name" --link-features
+```
+
+```text
+Music/
+├── Primary Artist/
+│   ├── Album/05.Track [video-id].opus
+│   └── Singles/Song [video-id].opus
+└── Guest Artist/
+    └── Features/
+        ├── Album/05.Track [video-id].opus -> ../../../Primary Artist/Album/05.Track [video-id].opus
+        └── Singles/Song [video-id].opus -> ../../../Primary Artist/Singles/Song [video-id].opus
+```
+
+When available, `get_song_credits()`'s `performed_by` list determines feature links;
+missing/empty credits or failed requests fall back to the track's artist list.
+Credits requests only run with `--link-features` and never change canonical placement.
+Duplicate performer paths and the canonical artist are excluded.
+
+Links use the final audio filename, including original album track numbers. Correct
+links are reused, stale/broken links are replaced, and existing regular files are
+left untouched. Enabling the flag on an already-downloaded track adds missing links
+without downloading it again. Symlink creation requires filesystem/OS support.
+
+Duplicate detection searches for real audio files containing `[video-id]` throughout
+`music_dir`, ignoring feature symlinks, thumbnails, and partial downloads. Older
+files are reused in their existing locations; this change does not migrate an
+existing library. `--force` bypasses this check, but yt-dlp may still skip an existing
+output file.
+
 ### Artist mode
 
 After matching the artist, you'll be asked what you want to browse:
@@ -171,7 +216,7 @@ A thumbnail appears below the metadata when artwork is available and Chafa is in
 
 Selection depends on the mode:
 
-- **Song search** → multi-select one or more song results, then press Enter to download them into your `music_dir` (by default `~/Music/`)
+- **Song search** → multi-select one or more song results, then press Enter to download them into `Artist/Singles/` under your `music_dir`
 - **Album search** → select an album, then choose tracks from its tracklist
 - **Artist mode** → multi-select songs, albums, and singles together; each selected album or single then opens its own track picker
 
