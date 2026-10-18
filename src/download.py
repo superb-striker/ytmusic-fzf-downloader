@@ -4,11 +4,13 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from mutagen import MutagenError
+
 import config
+from audio_tags import AUDIO_HANDLERS, read_youtube_id, write_youtube_id
 from ytmusic_client import yt
 
-AUDIO_EXTENSIONS = {".aac", ".aiff", ".alac", ".flac", ".m4a", ".mka",
-                    ".mp3", ".ogg", ".opus", ".vorbis", ".wav", ".webm"}
+AUDIO_EXTENSIONS = set(AUDIO_HANDLERS)
 
 
 def sanitize(name):
@@ -36,11 +38,12 @@ def find_downloaded(video_id):
     """Find real audio, ignoring feature links, artwork and incomplete downloads."""
     candidates = []
     for path in config.music_dir.rglob("*"):
-        if (f"[{video_id}]" in path.name and path.suffix.lower() in AUDIO_EXTENSIONS
-                and not path.is_symlink() and path.is_file()):
+        if (path.suffix.lower() not in AUDIO_EXTENSIONS or path.is_symlink() or not path.is_file()):
+            continue
+        stored_id = read_youtube_id(path)
+        if stored_id == video_id or (not stored_id and f"[{video_id}]" in path.name):
             candidates.append(path)
-    # Prefer extracted audio over a retained WebM/Matroska intermediate.
-    candidates.sort(key=lambda path: (path.suffix.lower() in {".webm", ".mka"}, str(path)))
+    candidates.sort(key=str)
     return candidates[0].resolve() if candidates else None
 
 
@@ -129,6 +132,11 @@ def _download_track(track, directory, canonical_artist, collection, force, link_
                         candidate = directory / candidate
                     if candidate.is_file() and not candidate.is_symlink():
                         source = candidate.resolve()
+        if source:
+            try:
+                write_youtube_id(source, video_id)
+            except (MutagenError, OSError, ValueError) as error:
+                print(f"Could not store YouTube ID in {source}: {error}")
     if link_features and source:
         link_performers(track, source, canonical_artist, collection)
 

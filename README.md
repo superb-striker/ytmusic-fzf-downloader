@@ -33,6 +33,7 @@ For artists, it fetches their **entire** catalog (not just the ~25-item preview 
 - `src/ytmusic_client.py` — the shared `YTMusic()` instance
 - `src/browse.py` — all search/API logic: resolving a query into items, fetching an artist's full albums/singles/songs
 - `src/metadata.py` — metadata formatting and thumbnail selection helpers
+- `src/audio_tags.py` — reads and writes `YOUTUBE_ID` in format-specific audio tags
 - `src/picker.py` — the `fzf` wrappers (single-select and multi-select)
 - `src/preview.py` — renders fzf preview metadata and cached thumbnail artwork
 - `src/handoff.py` — routes selected items to the appropriate track picker and downloader
@@ -180,8 +181,23 @@ links are reused, stale/broken links are replaced, and existing regular files ar
 left untouched. Enabling the flag on an already-downloaded track adds missing links
 without downloading it again. Symlink creation requires filesystem/OS support.
 
-Duplicate detection searches for real audio files containing `[video-id]` throughout
-`music_dir`, ignoring feature symlinks, thumbnails, and partial downloads. Older
+Downloads store `YOUTUBE_ID` after postprocessing, even when optional metadata
+embedding is disabled:
+
+| File format | ID storage |
+|---|---|
+| Opus, Ogg Vorbis, FLAC | `YOUTUBE_ID` Vorbis comment |
+| M4A (AAC or ALAC) | `----:com.youtube:YOUTUBE_ID` UTF-8 freeform tag |
+| MP3, WAV | ID3 `TXXX` frame with description `YOUTUBE_ID` |
+Mutagen updates the ID while preserving other tags.
+
+If tagging fails, the download is retained and a message is printed. Duplicate
+detection reads the ID first, falling back to `[video-id]`
+filenames when no readable ID tag is available. Filenames retain the ID for
+compatibility with other formats and older downloads.
+
+Duplicate detection searches real audio files throughout `music_dir`, ignoring
+feature symlinks, thumbnails, and partial downloads. Older
 files are reused in their existing locations; this change does not migrate an
 existing library. `--force` bypasses this check, but yt-dlp may still skip an existing
 output file.
